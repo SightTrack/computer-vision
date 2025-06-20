@@ -1,0 +1,20 @@
+{
+  "csv_file": "ai_training_data.csv",
+  "image_dir": "images",
+  "batch_size": 32,
+  "num_epochs": 150,
+  "early_stopping_patience": 15,
+  "backbone": "efficientnet_v2_m",
+  "dropout": 0.4,
+  "image_size": 224,
+  "learning_rate": 0.0002,
+  "weight_decay": 0.0001,
+  "use_cosine_schedule": true,
+  "label_smoothing": 0.1,
+  "device": "cpu",
+  "num_workers": 4,
+  "use_mixup": true,
+  "mixup_alpha": 0.2,
+  "use_cutmix": true,
+  "cutmix_alpha": 1.0
+}
