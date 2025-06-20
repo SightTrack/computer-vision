@@ -1,0 +1,62 @@
+# SightTrack AI Model Configuration
+# Professional configuration for species classification model
+
+# Model settings
+model:
+  backbone: "efficientnet_v2_s"  # Options: efficientnet_v2_s, efficientnet_v2_m, resnet50
+  num_classes: 28  # Will be updated automatically based on data
+  dropout: 0.5
+  image_size: 224
+  pretrained: true
+
+# Training settings
+training:
+  batch_size: 16
+  num_epochs: 100
+  learning_rate: 0.0001
+  weight_decay: 0.01
+  early_stopping_patience: 15
+  validation_split: 0.2
+  
+  # Optimization
+  optimizer: "adamw"  # Options: adam, adamw, sgd
+  scheduler: "cosine"  # Options: cosine, step, plateau
+  label_smoothing: 0.1
+  
+  # Augmentation
+  use_mixup: true
+  mixup_alpha: 0.2
+  use_cutmix: true
+  cutmix_alpha: 1.0
+  use_advanced_augmentation: true
+
+# Data settings
+data:
+  csv_file: "data/processed/species_data.csv"
+  image_dir: "data/images"
+  target_level: "family"  # Options: species, genus, family, order
+  
+  # Dataset URLs (for automatic downloading on EC2)
+  inaturalist_url: "https://www.inaturalist.org/observations/export"
+  gbif_url: "https://www.gbif.org/occurrence/download"
+
+# System settings
+system:
+  device: "auto"  # Options: auto, cuda, cpu
+  num_workers: 4
+  pin_memory: true
+  mixed_precision: true
+  
+# Paths
+paths:
+  model_save_dir: "models"
+  logs_dir: "logs"
+  checkpoints_dir: "checkpoints"
+  results_dir: "results"
+  
+# Logging
+logging:
+  use_tensorboard: true
+  log_every_n_steps: 50
+  save_model_every_n_epochs: 10
+  verbose: true 

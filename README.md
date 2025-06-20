@@ -1,249 +1,343 @@
-# SightTrack AI
+# SightTrack AI - Species Classification
 
-A deep learning system for automated species classification using computer vision. This project implements a state-of-the-art EfficientNet-based neural network to classify wildlife species from photographs, targeting taxonomic family-level identification.
+A professional deep learning system for automated species classification using computer vision. Built with PyTorch and EfficientNet for robust performance on AWS EC2.
 
-## Overview
+## 🎯 Overview
 
-SightTrack AI processes biodiversity observation data from sources like iNaturalist and GBIF to train image classification models that can identify species families from photographs. The system uses modern deep learning techniques including data augmentation, transfer learning, and hierarchical classification to achieve robust performance across diverse taxonomic groups.
+SightTrack AI is a state-of-the-art species classification system that uses EfficientNet-based neural networks to identify wildlife species from photographs. The system is designed for easy deployment on AWS EC2 instances with comprehensive automation scripts.
 
 ### Key Features
 
-- **Multi-level Classification**: Supports classification at different taxonomic levels (species, genus, family, etc.)
-- **Advanced Data Augmentation**: Implements MixUp, CutMix, and other augmentation techniques
-- **Transfer Learning**: Built on pre-trained EfficientNet models for better performance
-- **Hierarchical Labels**: Maintains full taxonomic hierarchy for comprehensive classification
-- **GPU/CPU Support**: Automatically detects and utilizes available hardware
-- **Comprehensive Evaluation**: Includes detailed metrics and visualization tools
+- **Professional Architecture**: Clean, modular codebase with separation of concerns
+- **EC2 Ready**: One-command setup for AWS EC2 deployment
+- **Automated Data Pipeline**: Scripts for downloading and processing iNaturalist dataset
+- **Advanced Training**: Mixed precision, data augmentation, and early stopping
+- **Easy Inference**: Simple prediction scripts for single images or batch processing
+- **Comprehensive Logging**: TensorBoard integration and detailed progress tracking
 
-## Current Model Performance
+## 🚀 Quick Start on EC2
 
-The trained model classifies 28 taxonomic families with the following architecture:
-- **Backbone**: EfficientNet-V2-S
-- **Input Size**: 224x224 RGB images
-- **Classes**: 28 taxonomic families
-- **Training Data**: 441 observations across diverse species
+### Step 1: Launch EC2 Instance
 
-### Training Results
+1. Launch an EC2 instance (recommended: `g4dn.xlarge` or larger for GPU training)
+2. Use Ubuntu 20.04 or 22.04 LTS AMI
+3. Configure security groups to allow SSH access
+4. Connect to your instance via SSH
 
-![Training Run 1](graphs/Run-1.png)
-*Training and validation metrics for initial model run*
+### Step 2: Setup Environment
 
-![Training Run 2](graphs/Run-2.png)
-*Improved training results with enhanced configuration*
+```bash
+# Upload project files to EC2 instance
+scp -r sighttrack-ai ubuntu@your-ec2-ip:/home/ubuntu/
 
-## Project Structure
+# SSH into EC2 instance
+ssh ubuntu@your-ec2-ip
+
+# Navigate to project directory
+cd /home/ubuntu/sighttrack-ai
+
+# Run setup script (this will install all dependencies)
+chmod +x scripts/setup_ec2.sh
+./scripts/setup_ec2.sh
+```
+
+### Step 3: Activate Environment
+
+```bash
+# Activate virtual environment
+source venv/bin/activate
+
+# Verify installation
+python -c "import torch; print(f'PyTorch: {torch.__version__}'); print(f'CUDA: {torch.cuda.is_available()}')"
+```
+
+### Step 4: Download Dataset
+
+```bash
+# Download and prepare the iNaturalist GBIF dataset
+./scripts/download_data.sh
+```
+
+The script will automatically download the iNaturalist GBIF observations dataset directly from iNaturalist and process it for training.
+
+### Step 5: Start Training
+
+```bash
+# Train the model with default configuration
+python train.py
+
+# Or with custom configuration
+python train.py --config config/model_config.yaml --device cuda
+```
+
+### Step 6: Make Predictions
+
+```bash
+# Predict single image
+python predict.py path/to/image.jpg
+
+# Batch prediction
+python predict.py path/to/images/ --batch --output results.json
+```
+
+## 📁 Project Structure
 
 ```
 sighttrack-ai/
-├── train_species_model.py     # Main training script
-├── predict_species.py         # Inference and prediction
-├── process_observations.py    # Data processing and preparation
-├── model.py                   # Core model architecture
-├── requirements.txt           # Python dependencies
-├── config.json                # Training configuration
-├── filtered_family_data.csv   # Processed training dataset
-├── family_label_encoder.json  # Label encoding mappings
-├── images/                    # Training images directory
-├── graphs/                    # Training visualization plots
-└── best_model.pth            # Trained model weights
+├── config/
+│   └── model_config.yaml          # Training configuration
+├── src/
+│   ├── model.py                   # Model architecture
+│   ├── dataset.py                 # Data loading and preprocessing
+│   ├── trainer.py                 # Training logic
+│   └── utils.py                   # Utility functions
+├── scripts/
+│   ├── setup_ec2.sh              # EC2 setup script
+│   └── download_data.sh           # Data download script
+├── data/
+│   ├── raw/                       # Raw downloaded data
+│   ├── processed/                 # Processed CSV files
+│   └── images/                    # Image files
+├── models/                        # Saved model checkpoints
+├── logs/                         # Training logs
+├── results/                      # Training results
+├── train.py                      # Main training script
+├── predict.py                    # Prediction script
+├── requirements.txt              # Python dependencies
+└── README.md                     # This file
 ```
 
-## Installation
+## ⚙️ Configuration
 
-### Prerequisites
+The main configuration is in `config/model_config.yaml`. Key settings:
 
-- Python 3.8+
-- CUDA-compatible GPU (optional, for faster training)
+### Model Settings
+```yaml
+model:
+  backbone: "efficientnet_v2_s"    # Model architecture
+  dropout: 0.5                     # Dropout rate
+  image_size: 224                  # Input image size
+  pretrained: true                 # Use pretrained weights
+```
 
-### Setup
+### Training Settings
+```yaml
+training:
+  batch_size: 16                   # Batch size
+  num_epochs: 100                  # Maximum epochs
+  learning_rate: 0.0001            # Learning rate
+  early_stopping_patience: 15     # Early stopping patience
+```
 
-1. Clone the repository:
+### Data Settings
+```yaml
+data:
+  target_level: "family"           # Classification level (species, genus, family)
+  csv_file: "data/processed/species_data.csv"
+  image_dir: "data/images"
+```
+
+## 🎯 Advanced Usage
+
+### Custom Training
+
 ```bash
-git clone <repository-url>
+# Train with specific parameters
+python train.py \
+    --config config/model_config.yaml \
+    --device cuda \
+    --debug
+
+# Resume from checkpoint
+python train.py --resume checkpoints/checkpoint_epoch_50.pth
+```
+
+### Prediction Options
+
+```bash
+# Single image with top 3 predictions
+python predict.py image.jpg --top-k 3
+
+# Batch processing with custom model
+python predict.py images/ \
+    --batch \
+    --model models/custom_model.pth \
+    --output predictions.json
+
+# CPU-only prediction
+python predict.py image.jpg --device cpu
+```
+
+### Model Evaluation
+
+```bash
+# View training progress
+tensorboard --logdir logs/
+
+# Check model performance
+python -c "
+import torch
+checkpoint = torch.load('models/best_model.pth', map_location='cpu')
+print(f'Best validation accuracy: {checkpoint[\"best_val_acc\"]:.4f}')
+"
+```
+
+## 🛠️ Development
+
+### Local Development Setup
+
+```bash
+# Clone repository
+git clone <your-repo-url>
 cd sighttrack-ai
-```
 
-2. Install dependencies:
-```bash
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# or
+venv\Scripts\activate     # Windows
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Create directory structure
+python -c "
+from pathlib import Path
+from src.utils import create_directory_structure
+create_directory_structure(Path('.'))
+"
 ```
 
-3. Verify installation:
-```bash
-python quick_start.py
-```
+### Code Quality
 
-## Usage
+The codebase follows professional Python standards:
 
-### Quick Start
+- **Type Hints**: Full type annotation support
+- **Documentation**: Comprehensive docstrings
+- **Error Handling**: Robust error handling and validation
+- **Logging**: Structured logging throughout
+- **Configuration**: YAML-based configuration management
 
-For immediate model training with default settings:
+## 📊 Performance
 
-```bash
-python quick_start.py
-```
+### Model Specifications
 
-This script guides you through the complete process including data verification, GPU detection, and training initiation.
+- **Architecture**: EfficientNet-V2-S (default)
+- **Parameters**: ~20M parameters
+- **Input Size**: 224x224 RGB images
+- **Training Time**: ~2-4 hours on g4dn.xlarge
+- **Inference Speed**: ~50ms per image on GPU
 
-### Training a New Model
+### Hardware Requirements
 
-1. **Prepare your dataset**:
-```bash
-python process_observations.py
-```
+#### Minimum (CPU Training)
+- 4 CPU cores
+- 8GB RAM
+- 20GB storage
 
-2. **Configure training parameters** in `config.json`:
-```json
-{
-  "csv_file": "filtered_family_data.csv",
-  "image_dir": "images",
-  "batch_size": 4,
-  "num_epochs": 100,
-  "backbone": "efficientnet_v2_s",
-  "learning_rate": 0.00005,
-  "target_level": "family"
-}
-```
+#### Recommended (GPU Training)
+- AWS g4dn.xlarge or larger
+- NVIDIA GPU with 8GB+ VRAM
+- 16GB+ RAM
+- 50GB+ storage
 
-3. **Start training**:
-```bash
-python train_species_model.py
-```
-
-### Making Predictions
-
-Classify a single image:
-```bash
-python predict_species.py --image path/to/image.jpg --model best_model.pth
-```
-
-Batch processing:
-```bash
-python predict_species.py --batch path/to/images/ --model best_model.pth
-```
-
-### Data Processing
-
-Process raw biodiversity data:
-```bash
-python process_observations.py --input your_data.zip --output processed_data.csv
-```
-
-## Model Architecture
-
-The system uses EfficientNet-V2 as the backbone architecture with the following enhancements:
-
-- **Feature Extraction**: Pre-trained EfficientNet-V2-S with frozen early layers
-- **Classification Head**: Fully connected layers with dropout for regularization
-- **Data Augmentation**: Random crops, rotations, color jittering, MixUp, and CutMix
-- **Training Strategy**: Cosine annealing learning rate schedule with early stopping
-- **Loss Function**: Cross-entropy with label smoothing
-
-### Supported Taxonomic Families
-
-The current model recognizes 28 taxonomic families including:
-- **Birds**: Corvidae (crows), Paridae (tits), Anatidae (ducks), Ardeidae (herons)
-- **Mammals**: Cervidae (deer)
-- **Insects**: Nymphalidae (butterflies), Apidae (bees)
-- **Plants**: Pinaceae (pines), Amaryllidaceae (amaryllis family)
-- **Marine Life**: Asteriidae (starfish)
-
-## Configuration
-
-Key configuration parameters in `config.json`:
-
-- `batch_size`: Training batch size (default: 4)
-- `learning_rate`: Initial learning rate (default: 0.00005)
-- `backbone`: Model architecture (efficientnet_v2_s, efficientnet_v2_m, resnet50)
-- `dropout`: Dropout probability (default: 0.5)
-- `num_epochs`: Maximum training epochs (default: 100)
-- `early_stopping_patience`: Early stopping patience (default: 15)
-- `use_mixup`: Enable MixUp augmentation (default: true)
-- `use_cutmix`: Enable CutMix augmentation (default: true)
-
-## Data Requirements
-
-### Input Format
-
-The system expects CSV data with the following columns:
-- `id`: Unique observation identifier
-- `scientificName`: Full scientific name
-- `kingdom`, `phylum`, `class`, `order`, `family`, `genus`: Taxonomic hierarchy
-- `decimalLatitude`, `decimalLongitude`: Geographic coordinates
-- `image_filename`: Corresponding image file name
-- `eventDate`: Observation timestamp
-
-### Image Requirements
-
-- **Format**: JPEG/JPG
-- **Resolution**: Minimum 224x224 pixels (higher resolution recommended)
-- **Quality**: Clear, well-lit photos with visible subject features
-- **Naming**: Must match `image_filename` column in CSV data
-
-## Performance Optimization
-
-### Hardware Recommendations
-
-- **GPU**: NVIDIA GPU with 8GB+ VRAM for optimal training speed
-- **RAM**: 16GB+ system memory for large datasets
-- **Storage**: SSD recommended for faster data loading
-
-### Training Tips
-
-1. **Batch Size**: Adjust based on GPU memory (reduce if encountering CUDA OOM errors)
-2. **Learning Rate**: Start with 0.00005 and adjust based on validation performance
-3. **Data Augmentation**: Enable MixUp/CutMix for better generalization
-4. **Early Stopping**: Monitor validation accuracy to prevent overfitting
-
-## Monitoring and Evaluation
-
-The training process provides comprehensive monitoring:
-
-- **TensorBoard Integration**: Real-time training visualization
-- **Validation Metrics**: Accuracy, loss, and per-class performance
-- **Model Checkpointing**: Automatic saving of best-performing models
-- **Training Curves**: Loss and accuracy plots saved to `graphs/` directory
-
-## Troubleshooting
+## 🔧 Troubleshooting
 
 ### Common Issues
 
-1. **CUDA Out of Memory**: Reduce `batch_size` in configuration
-2. **Missing Images**: Verify `image_dir` path and file naming consistency
-3. **Poor Performance**: Increase training data or adjust augmentation parameters
-4. **Convergence Issues**: Modify learning rate or enable cosine annealing schedule
+1. **CUDA Out of Memory**
+   ```bash
+   # Reduce batch size in config
+   # Edit config/model_config.yaml
+   training:
+     batch_size: 8  # Reduce from 16
+   ```
 
-### Debug Tools
+2. **Missing Dependencies**
+   ```bash
+   # Reinstall requirements
+   pip install -r requirements.txt --force-reinstall
+   ```
 
-- `debug_validation.py`: Validate data integrity and model inputs
-- `analyze_training.py`: Analyze training performance and suggest improvements
-- `diagnose_data.py`: Identify data quality issues
+3. **Data Download Issues**
+   ```bash
+   # Check Kaggle credentials
+   cat ~/.kaggle/kaggle.json
+   
+   # Manual dataset setup
+   python -c "
+   import pandas as pd
+   from pathlib import Path
+   # Create sample data...
+   "
+   ```
 
-## Contributing
+4. **Model Loading Errors**
+   ```bash
+   # Check model compatibility
+   python -c "
+   import torch
+   model = torch.load('models/best_model.pth', map_location='cpu')
+   print('Model keys:', model.keys())
+   "
+   ```
+
+### Performance Optimization
+
+- **Batch Size**: Adjust based on GPU memory
+- **Image Size**: Reduce for faster training
+- **Mixed Precision**: Enabled by default for speed
+- **Data Loading**: Increase `num_workers` for faster I/O
+
+## 📈 Monitoring
+
+### Training Progress
+
+- **TensorBoard**: `tensorboard --logdir logs/`
+- **Log Files**: Check `logs/training.log`
+- **Model Checkpoints**: Saved in `checkpoints/`
+
+### System Monitoring
+
+```bash
+# GPU utilization
+nvidia-smi
+
+# System resources
+htop
+
+# Disk usage
+df -h
+```
+
+## 🤝 Contributing
 
 1. Fork the repository
 2. Create a feature branch
 3. Make your changes
-4. Add tests for new functionality
+4. Add tests if applicable
 5. Submit a pull request
 
-## License
+## 📝 License
 
 This project is licensed under the MIT License. See LICENSE file for details.
 
-## Citation
+## 🙏 Acknowledgments
 
-If you use this work in your research, please cite:
+- Built with PyTorch and Torchvision
+- Uses EfficientNet architecture from Google Research
+- Inspired by modern computer vision research
+- Dataset from iNaturalist community
 
-```
-SightTrack AI: Automated Species Classification Using Deep Learning
-[Your Name/Institution]
-[Year]
-```
+## 📞 Support
 
-## Acknowledgments
+For issues and questions:
 
-- Built using PyTorch and Torchvision
-- EfficientNet architecture from Google Research
-- Training data sourced from iNaturalist and GBIF
-- Inspired by modern computer vision research in biodiversity monitoring 
+1. Check the troubleshooting section above
+2. Review existing GitHub issues
+3. Create a new issue with detailed information
+4. Include system specifications and error logs
+
+---
+
+**Happy Species Classifying! 🦅🌿🦋** 
