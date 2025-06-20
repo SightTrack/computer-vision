@@ -1,4 +1,8 @@
 /dataset/gbif-observations-dwca.zip
+best_model.pth
+enhanced_best_model.pth
+/images/
+
 
 # Python
 __pycache__/
