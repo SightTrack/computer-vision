@@ -614,7 +614,7 @@ def main():
     print("=" * 50)
     
     # Load configuration from JSON file (prioritize v2 if exists)
-    config_files = ['fixed_config.json', 'improved_config_v2.json', 'improved_config.json']
+    config_files = ['config.json', 'improved_config.json', 'improved_config_v2.json']
     config_file = None
     
     for cf in config_files:
@@ -624,7 +624,7 @@ def main():
     
     if not config_file:
         print("❌ No configuration file found!")
-        print("Please ensure improved_config.json or improved_config_v2.json exists.")
+        print("Please ensure config.json exists.")
         return
         
     try:

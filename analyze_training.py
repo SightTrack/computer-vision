@@ -133,7 +133,7 @@ def generate_suggestions(train_val_gap, best_val_acc, loss_reduction):
     # Base config improvements
     current_config = {}
     try:
-        with open('improved_config.json', 'r') as f:
+        with open('config.json', 'r') as f:
             current_config = json.load(f)
     except:
         pass
